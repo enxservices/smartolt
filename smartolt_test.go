@@ -2,10 +2,12 @@ package smartolt
 
 import (
 	"testing"
+
+	"github.com/enxservices/smartolt/internal/types"
 )
 
 func TestSmartOLT(t *testing.T) {
-	smartOLTClient := NewSmartOLTClient(DefaultAPIKey, DefaultBaseURL)
+	smartOLTClient := NewSmartOLTClient(types.DefaultAPIKey, types.DefaultBaseURL)
 	ONUExternalID := "HWTCAD08F2AA"
 
 	// t.Run("Should reboot ONU successfully", func(t *testing.T) {
