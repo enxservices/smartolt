@@ -72,4 +72,5 @@ type SmartOLT interface {
 	UpdateSpeedProfile(ID, downloadProfile, uploadProfile string) error
 	RebootOnu(ID string) error
 	DisableOnu(ID string) error
+	EnableOnu(ID string) error
 }

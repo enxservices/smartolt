@@ -142,3 +142,12 @@ func (c *SmartOLTClient) DisableOnu(ID string) error {
 	}
 	return c.doRequest(req, nil)
 }
+
+func (c *SmartOLTClient) EnableOnu(ID string) error {
+	url := fmt.Sprintf("%s%s/%s", c.baseURL, types.ENABLEONU, ID)
+	req, err := http.NewRequest(http.MethodPost, url, nil)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	return c.doRequest(req, nil)
+}

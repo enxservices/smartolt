@@ -10,12 +10,12 @@ func TestSmartOLT(t *testing.T) {
 	smartOLTClient := NewSmartOLTClient(types.DefaultAPIKey, types.DefaultBaseURL)
 	ONUExternalID := "HWTCAD08F2AA"
 
-	// t.Run("Should reboot ONU successfully", func(t *testing.T) {
-	// 	err := smartOLTClient.RebootOnu(ONUExternalID)
-	// 	if err != nil {
-	// 		t.Fatalf("Expected success, but got error: %v", err)
-	// 	}
-	// })
+	t.Run("Should reboot ONU successfully", func(t *testing.T) {
+		err := smartOLTClient.RebootOnu(ONUExternalID)
+		if err != nil {
+			t.Fatalf("Expected success, but got error: %v", err)
+		}
+	})
 
 	t.Run("Should list speed profiles successfully", func(t *testing.T) {
 		profiles, err := smartOLTClient.GetSpeedProfiles()

@@ -7,6 +7,7 @@ const (
 	UPDATESPEEDPROFILE = "smartolt.com/api/onu/update_onu_speed_profiles"
 	REBOOTONU          = "smartolt.com/api/onu/reboot"
 	DISABLEONU         = "smartolt.com/api/onu/disable/"
+	ENABLEONU          = "smartolt.com/api/onu/enable"
 
 	DefaultAPIKey  = ""
 	DefaultBaseURL = "https://enx."
