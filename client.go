@@ -7,6 +7,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"time"
 
 	"github.com/enxservices/smartolt/internal/types"
 )
@@ -150,4 +151,38 @@ func (c *SmartOLTClient) EnableOnu(ID string) error {
 		return fmt.Errorf("%w", err)
 	}
 	return c.doRequest(req, nil)
+}
+
+func (c *SmartOLTClient) DiscoverOnuNeededReboot() ([]string, error) {
+	url := fmt.Sprintf("%s%s", c.baseURL, types.STATUSESONUS)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+
+	var resp types.Response[types.OnuStatus]
+	if err := c.doRequest(req, &resp); err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+
+	var onus []string
+	twoWeeksAgo := time.Now().Add(-14 * 24 * time.Hour)
+
+	for _, onu := range resp.Response {
+		if onu.Status != "Online" {
+			continue
+		}
+
+		lastReboot, err := time.Parse("2006-01-02 15:04:05", onu.LastStatusChange)
+		if err != nil {
+			fmt.Println("%w", err)
+			continue
+		}
+
+		if lastReboot.Before(twoWeeksAgo) {
+			onus = append(onus, onu.ID)
+		}
+	}
+
+	return onus, nil
 }

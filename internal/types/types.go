@@ -61,8 +61,21 @@ type ResponseError struct {
 }
 
 type Response[T any] struct {
-	Status   bool `json:"status"`
-	Response []T  `json:"response"`
+	Status       bool    `json:"status"`
+	ResponseCode *string `json:"response_code"`
+	Response     []T     `json:"response"`
+}
+
+type OnuStatus struct {
+	ID               string `json:"id"`
+	SN               string `json:"sn"`
+	OLTID            string `json:"olt_id"`
+	Board            string `json:"board"`
+	Port             string `json:"port"`
+	ONU              string `json:"onu"`
+	ZoneID           string `json:"zone_id"`
+	Status           string `json:"status"`
+	LastStatusChange string `json:"last_status_change"`
 }
 
 type SmartOLT interface {
@@ -73,4 +86,5 @@ type SmartOLT interface {
 	RebootOnu(ID string) error
 	DisableOnu(ID string) error
 	EnableOnu(ID string) error
+	GetOnusNeedingReboot() ([]string, error)
 }
