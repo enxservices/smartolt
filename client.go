@@ -12,13 +12,24 @@ import (
 	"github.com/enxservices/smartolt/internal/types"
 )
 
-type SmartOLTClient struct {
+type Client interface {
+	GetOnuDetails(ID string) (*types.OnuDetails, error)
+	GetOnuSignal(ID string) (*types.StatusSignal, error)
+	GetSpeedProfiles() ([]types.SpeedProfile, error)
+	UpdateSpeedProfile(ID, downloadProfile, uploadProfile string) error
+	RebootOnu(ID string) error
+	DisableOnu(ID string) error
+	EnableOnu(ID string) error
+	DiscoverOnuNeededReboot() ([]string, error)
+}
+
+type client struct {
 	client  *http.Client
 	baseURL string
 }
 
-func NewSmartOLTClient(token, baseURL string) *SmartOLTClient {
-	return &SmartOLTClient{
+func NewSmartOLTClient(token, baseURL string) Client {
+	return &client{
 		client: &http.Client{
 			Transport: &TransportWithToken{
 				Token: token,
@@ -28,7 +39,7 @@ func NewSmartOLTClient(token, baseURL string) *SmartOLTClient {
 	}
 }
 
-func (c *SmartOLTClient) doRequest(req *http.Request, respBody interface{}) error {
+func (c *client) doRequest(req *http.Request, respBody interface{}) error {
 	resp, err := c.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("erro ao fazer requisição: %w", err)
@@ -61,7 +72,7 @@ func (c *SmartOLTClient) doRequest(req *http.Request, respBody interface{}) erro
 	return nil
 }
 
-func (c *SmartOLTClient) GetOnuDetails(ID string) (*types.OnuDetails, error) {
+func (c *client) GetOnuDetails(ID string) (*types.OnuDetails, error) {
 	url := fmt.Sprintf("%s%s/%s", c.baseURL, types.GETONUDETAILS, ID)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -75,7 +86,7 @@ func (c *SmartOLTClient) GetOnuDetails(ID string) (*types.OnuDetails, error) {
 	return &details, nil
 }
 
-func (c *SmartOLTClient) GetOnuSignal(ID string) (*types.StatusSignal, error) {
+func (c *client) GetOnuSignal(ID string) (*types.StatusSignal, error) {
 	url := fmt.Sprintf("%s%s/%s", c.baseURL, types.GETONUSIGNAL, ID)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -89,7 +100,7 @@ func (c *SmartOLTClient) GetOnuSignal(ID string) (*types.StatusSignal, error) {
 	return &signal, nil
 }
 
-func (c *SmartOLTClient) GetSpeedProfiles() ([]types.SpeedProfile, error) {
+func (c *client) GetSpeedProfiles() ([]types.SpeedProfile, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, types.GETSPEEDPROFILE)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -104,7 +115,7 @@ func (c *SmartOLTClient) GetSpeedProfiles() ([]types.SpeedProfile, error) {
 	return resp.Response, nil
 }
 
-func (c *SmartOLTClient) UpdateSpeedProfile(ID, downloadProfile, uploadProfile string) error {
+func (c *client) UpdateSpeedProfile(ID, downloadProfile, uploadProfile string) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
@@ -126,7 +137,7 @@ func (c *SmartOLTClient) UpdateSpeedProfile(ID, downloadProfile, uploadProfile s
 	return c.doRequest(req, nil)
 }
 
-func (c *SmartOLTClient) RebootOnu(ID string) error {
+func (c *client) RebootOnu(ID string) error {
 	url := fmt.Sprintf("%s%s/%s", c.baseURL, types.REBOOTONU, ID)
 	req, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
@@ -135,7 +146,7 @@ func (c *SmartOLTClient) RebootOnu(ID string) error {
 	return c.doRequest(req, nil)
 }
 
-func (c *SmartOLTClient) DisableOnu(ID string) error {
+func (c *client) DisableOnu(ID string) error {
 	url := fmt.Sprintf("%s%s/%s", c.baseURL, types.DISABLEONU, ID)
 	req, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
@@ -144,7 +155,7 @@ func (c *SmartOLTClient) DisableOnu(ID string) error {
 	return c.doRequest(req, nil)
 }
 
-func (c *SmartOLTClient) EnableOnu(ID string) error {
+func (c *client) EnableOnu(ID string) error {
 	url := fmt.Sprintf("%s%s/%s", c.baseURL, types.ENABLEONU, ID)
 	req, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
@@ -153,7 +164,7 @@ func (c *SmartOLTClient) EnableOnu(ID string) error {
 	return c.doRequest(req, nil)
 }
 
-func (c *SmartOLTClient) DiscoverOnuNeededReboot() ([]string, error) {
+func (c *client) DiscoverOnuNeededReboot() ([]string, error) {
 	url := fmt.Sprintf("%s%s", c.baseURL, types.STATUSESONUS)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
