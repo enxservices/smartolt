@@ -82,3 +82,37 @@ func TestSmartOLT(t *testing.T) {
 		t.Logf("ONU Details: [%v]", resp)
 	})
 }
+
+func TestCalculateODBAvailability(t *testing.T) {
+	obds := []types.ODB{
+		{ID: "2", Name: "test odb", ZoneID: "1", Ports: 8},
+		{ID: "3", Name: "test odb2", ZoneID: "18", Ports: 16},
+	}
+	onus := []types.OnuListItem{
+		{UniqueExternalID: "test1", ODBName: "test odb"},
+		{UniqueExternalID: "test2", ODBName: "test odb2"},
+		{UniqueExternalID: "test3", ODBName: "test odb2"},
+	}
+
+	got := CalculateODBAvailability(obds, onus)
+
+	if len(got) != 2 {
+		t.Fatalf("expected 2 ODB availability entries, got %d", len(got))
+	}
+
+	// Map by ODB ID for assertions
+	byID := map[string]types.ODBAvailability{}
+	for _, g := range got {
+		byID[g.OdbID] = g
+	}
+
+	a := byID["2"]
+	if a.TotalPorts != 8 || a.UsedPorts != 1 || a.AvailablePorts != 7 {
+		t.Fatalf("unexpected availability for ODB 2: %+v", a)
+	}
+
+	b := byID["3"]
+	if b.TotalPorts != 16 || b.UsedPorts != 2 || b.AvailablePorts != 14 {
+		t.Fatalf("unexpected availability for ODB 3: %+v", b)
+	}
+}

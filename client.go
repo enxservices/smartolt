@@ -16,6 +16,9 @@ type Client interface {
 	GetOnuDetails(ID string) (*types.OnuDetails, error)
 	GetOnuSignal(ID string) (*types.StatusSignal, error)
 	GetSpeedProfiles() ([]types.SpeedProfile, error)
+	GetAllOnusDetails() ([]types.OnuListItem, error)
+	GetOdbs() ([]types.ODB, error)
+	GetODBAvailability() ([]types.ODBAvailability, error)
 	UpdateSpeedProfile(ID, downloadProfile, uploadProfile string) error
 	RebootOnu(ID string) error
 	DisableOnu(ID string) error
@@ -113,6 +116,50 @@ func (c *client) GetSpeedProfiles() ([]types.SpeedProfile, error) {
 	}
 
 	return resp.Response, nil
+}
+
+func (c *client) GetAllOnusDetails() ([]types.OnuListItem, error) {
+	url := fmt.Sprintf("%s%s", c.baseURL, types.GETALLONUSDETAILS)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+
+	var resp types.OnuListResponse
+	if err := c.doRequest(req, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Onus, nil
+}
+
+func (c *client) GetOdbs() ([]types.ODB, error) {
+	url := fmt.Sprintf("%s%s", c.baseURL, types.GETODBS)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+
+	var resp types.ODBListResponse
+	if err := c.doRequest(req, &resp); err != nil {
+		return nil, err
+	}
+	return resp.Response, nil
+}
+
+func (c *client) GetODBAvailability() ([]types.ODBAvailability, error) {
+	obds, err := c.GetOdbs()
+	if err != nil {
+		return nil, err
+	}
+
+	onus, err := c.GetAllOnusDetails()
+	if err != nil {
+		return nil, err
+	}
+
+	availability := CalculateODBAvailability(obds, onus)
+	return availability, nil
 }
 
 func (c *client) UpdateSpeedProfile(ID, downloadProfile, uploadProfile string) error {

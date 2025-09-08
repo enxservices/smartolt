@@ -88,3 +88,41 @@ type SmartOLT interface {
 	EnableOnu(ID string) error
 	GetOnusNeedingReboot() ([]string, error)
 }
+
+// ODB represents an Optical Distribution Box with a total number of ports.
+// Note: If the API encodes numbers as strings, the ",string" tag handles it.
+type ODB struct {
+	ID        string  `json:"id"`
+	Name      string  `json:"name"`
+	Latitude  *string `json:"latitude"`
+	Longitude *string `json:"longitude"`
+	ZoneID    string  `json:"zone_id"`
+	Ports     int     `json:"ports,string"`
+}
+
+// ODBListResponse matches the ODBs list API response structure.
+type ODBListResponse struct {
+	Status   bool  `json:"status"`
+	Response []ODB `json:"response"`
+}
+
+// OnuListItem is a lightweight representation from the ONUs list API.
+type OnuListItem struct {
+	UniqueExternalID string `json:"unique_external_id"`
+	ODBName          string `json:"odb_name"`
+}
+
+// OnuListResponse matches the ONUs list API response structure.
+type OnuListResponse struct {
+	Status bool          `json:"status"`
+	Onus   []OnuListItem `json:"onus"`
+}
+
+// ODBAvailability summarizes port usage for an ODB.
+type ODBAvailability struct {
+	OdbID          string `json:"odb_id"`
+	OdbName        string `json:"odb_name"`
+	TotalPorts     int    `json:"total_ports"`
+	UsedPorts      int    `json:"used_ports"`
+	AvailablePorts int    `json:"available_ports"`
+}
