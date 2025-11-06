@@ -24,6 +24,8 @@ type Client interface {
 	DisableOnu(ID string) error
 	EnableOnu(ID string) error
 	DiscoverOnuNeededReboot() ([]string, error)
+	AuthorizeConnection(connectionDetails types.ConnectionDetails) error
+	UnconfiguredOnusForOlt(oltID string) ([]types.UnconfiguredOnu, error)
 }
 
 type client struct {
@@ -203,7 +205,7 @@ func (c *client) DisableOnu(ID string) error {
 }
 
 func (c *client) EnableOnu(ID string) error {
-	url := fmt.Sprintf("%s%s/%s", c.baseURL, types.ENABLEONU, ID)
+	url := fmt.Sprintf("%s%s%s", c.baseURL, types.ENABLEONU, ID)
 	req, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
 		return fmt.Errorf("%w", err)
@@ -243,4 +245,77 @@ func (c *client) DiscoverOnuNeededReboot() ([]string, error) {
 	}
 
 	return onus, nil
+}
+
+func (c *client) AuthorizeConnection(connectionDetails types.ConnectionDetails) error {
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	if err := writer.WriteField("olt_id", connectionDetails.OltID); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("pon_type", connectionDetails.PonType); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("gpon_channel", connectionDetails.GponChannel); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("board", connectionDetails.Board); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("port", connectionDetails.Port); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("sn", connectionDetails.SN); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("vlan", connectionDetails.VLAN); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("onu_type", connectionDetails.OnuType); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("zone", connectionDetails.Zone); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("odb", connectionDetails.ODB); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("name", connectionDetails.Name); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("address_or_comment", connectionDetails.AddressOrComment); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("onu_mode", connectionDetails.OnuMode); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("onu_external_id", connectionDetails.OnuExternalID); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	writer.Close()
+
+	url := fmt.Sprintf("%s%s", c.baseURL, types.AUTHORIZECONNECTION)
+	req, err := http.NewRequest(http.MethodPost, url, body)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	return c.doRequest(req, nil)
+}
+
+func (c *client) UnconfiguredOnusForOlt(oltID string) ([]types.UnconfiguredOnu, error) {
+	url := fmt.Sprintf("%s%s%s", c.baseURL, types.UNCONFIGUREDONU, oltID)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+
+	var resp types.Response[types.UnconfiguredOnu]
+	if err := c.doRequest(req, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Response, nil
 }

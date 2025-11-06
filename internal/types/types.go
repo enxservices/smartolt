@@ -37,6 +37,34 @@ type OnuDetails struct {
 	ServicePort          []ServicePort `json:"service_ports"`
 }
 
+type ConnectionDetails struct {
+	OltID            string
+	PonType          string
+	GponChannel      string
+	Board            string
+	Port             string
+	SN               string
+	VLAN             string
+	OnuType          string
+	Zone             string
+	ODB              string
+	Name             string
+	AddressOrComment string
+	OnuMode          string
+	OnuExternalID    string
+}
+
+type UnconfiguredOnu struct {
+	PonType     string `json:"pon_type"`
+	Board       string `json:"board"`
+	Port        string `json:"port"`
+	Onu         string `json:"onu"`
+	SN          string `json:"sn"`
+	OnuTypeName string `json:"onu_type_name"`
+	OnuTypeID   string `json:"onu_type_id"`
+	OltID       string `json:"olt_id"`
+}
+
 type ServicePort struct {
 	Port             string `json:"service_port"`
 	Vlan             string `json:"vlan"`
@@ -76,17 +104,6 @@ type OnuStatus struct {
 	ZoneID           string `json:"zone_id"`
 	Status           string `json:"status"`
 	LastStatusChange string `json:"last_status_change"`
-}
-
-type SmartOLT interface {
-	GetOnuDetails(ID string) (*OnuDetails, error)
-	GetOnuSignal(ID string) (*StatusSignal, error)
-	GetSpeedProfiles() ([]SpeedProfile, error)
-	UpdateSpeedProfile(ID, downloadProfile, uploadProfile string) error
-	RebootOnu(ID string) error
-	DisableOnu(ID string) error
-	EnableOnu(ID string) error
-	GetOnusNeedingReboot() ([]string, error)
 }
 
 // ODB represents an Optical Distribution Box with a total number of ports.
