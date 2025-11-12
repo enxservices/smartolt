@@ -12,6 +12,23 @@ import (
 	"github.com/enxservices/smartolt/internal/types"
 )
 
+type ConnectionDetails struct {
+	OltID            string
+	PonType          string
+	GponChannel      string
+	Board            string
+	Port             string
+	SN               string
+	VLAN             string
+	OnuType          string
+	Zone             string
+	ODB              string
+	Name             string
+	AddressOrComment string
+	OnuMode          string
+	OnuExternalID    string
+}
+
 type Client interface {
 	GetOnuDetails(ID string) (*types.OnuDetails, error)
 	GetOnuSignal(ID string) (*types.StatusSignal, error)
@@ -24,7 +41,7 @@ type Client interface {
 	DisableOnu(ID string) error
 	EnableOnu(ID string) error
 	DiscoverOnuNeededReboot() ([]string, error)
-	AuthorizeConnection(connectionDetails types.ConnectionDetails) error
+	AuthorizeConnection(connectionDetails ConnectionDetails) error
 	UnconfiguredOnusForOlt(oltID string) ([]types.UnconfiguredOnu, error)
 }
 
@@ -247,7 +264,7 @@ func (c *client) DiscoverOnuNeededReboot() ([]string, error) {
 	return onus, nil
 }
 
-func (c *client) AuthorizeConnection(connectionDetails types.ConnectionDetails) error {
+func (c *client) AuthorizeConnection(connectionDetails ConnectionDetails) error {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 

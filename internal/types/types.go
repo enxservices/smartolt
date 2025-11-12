@@ -37,23 +37,6 @@ type OnuDetails struct {
 	ServicePort          []ServicePort `json:"service_ports"`
 }
 
-type ConnectionDetails struct {
-	OltID            string
-	PonType          string
-	GponChannel      string
-	Board            string
-	Port             string
-	SN               string
-	VLAN             string
-	OnuType          string
-	Zone             string
-	ODB              string
-	Name             string
-	AddressOrComment string
-	OnuMode          string
-	OnuExternalID    string
-}
-
 type UnconfiguredOnu struct {
 	PonType     string `json:"pon_type"`
 	Board       string `json:"board"`
