@@ -13,6 +13,8 @@ const (
 	STATUSESONUS        = "/onu/get_onu_statuses?olt_id=1"
 	AUTHORIZECONNECTION = "/onu/authorize_onu"
 	UNCONFIGUREDONU     = "/onu/unconfigured_onus_for_olt/"
+	MOVEONU 		    = "/onu/move/"
 	DefaultAPIKey       = ""
 	DefaultBaseURL      = "https://enx.smartolt.com/api"
+	
 )

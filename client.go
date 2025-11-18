@@ -29,6 +29,13 @@ type ConnectionDetails struct {
 	OnuExternalID    string
 }
 
+type MoveOnuDetails struct {
+	TargetOltID string
+	TargetPort  string
+	TargetBoard string
+	SN          string
+}
+
 type Client interface {
 	GetOnuDetails(ID string) (*types.OnuDetails, error)
 	GetOnuSignal(ID string) (*types.StatusSignal, error)
@@ -335,4 +342,29 @@ func (c *client) UnconfiguredOnusForOlt(oltID string) ([]types.UnconfiguredOnu, 
 	}
 
 	return resp.Response, nil
+}
+
+func (c *client) MoveOnu(moveDetails MoveOnuDetails) error {
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	if err := writer.WriteField("olt_id", moveDetails.TargetOltID); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("port", moveDetails.TargetPort); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if err := writer.WriteField("board", moveDetails.TargetBoard); err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	writer.Close()
+
+	url := fmt.Sprintf("%s%s%s", c.baseURL, types.MOVEONU, moveDetails.SN)
+	req, err := http.NewRequest(http.MethodPost, url, body)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	return c.doRequest(req, nil)
 }
