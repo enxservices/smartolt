@@ -14,6 +14,7 @@ const (
 	AUTHORIZECONNECTION = "/onu/authorize_onu"
 	UNCONFIGUREDONU     = "/onu/unconfigured_onus_for_olt/"
 	MOVEONU 		    = "/onu/move/"
+	DELETEONU           = "/onu/delete/"
 	DefaultAPIKey       = ""
 	DefaultBaseURL      = "https://enx.smartolt.com/api"
 	

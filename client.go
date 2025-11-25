@@ -368,3 +368,14 @@ func (c *client) MoveOnu(moveDetails MoveOnuDetails) error {
 
 	return c.doRequest(req, nil)
 }
+
+
+func (c *client) DeleteOnu(ID string) error {
+	url := fmt.Sprintf("%s%s%s", c.baseURL, types.DELETEONU, ID)
+	req, err := http.NewRequest(http.MethodDelete, url, nil)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	
+	return c.doRequest(req, nil)
+}	
