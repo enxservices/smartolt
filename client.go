@@ -50,6 +50,8 @@ type Client interface {
 	DiscoverOnuNeededReboot() ([]string, error)
 	AuthorizeConnection(connectionDetails ConnectionDetails) error
 	UnconfiguredOnusForOlt(oltID string) ([]types.UnconfiguredOnu, error)
+	MoveOnu(moveDetails MoveOnuDetails) error
+	DeleteOnu(ID string) error
 }
 
 type client struct {
