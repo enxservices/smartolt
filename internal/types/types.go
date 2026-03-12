@@ -39,7 +39,7 @@ type OnuDetails struct {
 
 type UnconfiguredOnu struct {
 	PonType     string `json:"pon_type"`
-	Board       string `json:"board"`
+	Board       int    `json:"board"`
 	Port        string `json:"port"`
 	Onu         string `json:"onu"`
 	SN          string `json:"sn"`
