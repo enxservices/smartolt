@@ -1,5 +1,31 @@
 package types
 
+import (
+	"encoding/json"
+	"fmt"
+)
+
+// FlexString unmarshals a JSON string or number into a Go string. SmartOLT's API is
+// inconsistent about which JSON type it uses for some numeric-looking fields (e.g.
+// onu_type_id), so fields that have been observed coming back as either type use this
+// instead of a plain string.
+type FlexString string
+
+func (f *FlexString) UnmarshalJSON(data []byte) error {
+	var s string
+	if err := json.Unmarshal(data, &s); err == nil {
+		*f = FlexString(s)
+		return nil
+	}
+
+	var n json.Number
+	if err := json.Unmarshal(data, &n); err != nil {
+		return fmt.Errorf("FlexString: %w", err)
+	}
+	*f = FlexString(n.String())
+	return nil
+}
+
 type StatusSignal struct {
 	Status         bool   `json:"status"`
 	OnuSignal      string `json:"onu_signal"`
@@ -17,7 +43,7 @@ type OnuDetails struct {
 	Board                string        `json:"board"`
 	Port                 string        `json:"port"`
 	Onu                  string        `json:"onu"`
-	OnuTypeID            string        `json:"onu_type_id"`
+	OnuTypeID            FlexString    `json:"onu_type_id"`
 	OnuTypeName          string        `json:"onu_type_name"`
 	ZoneID               string        `json:"zone_id"`
 	ZoneName             string        `json:"zone_name"`
@@ -38,14 +64,14 @@ type OnuDetails struct {
 }
 
 type UnconfiguredOnu struct {
-	PonType     string `json:"pon_type"`
-	Board       string `json:"board"`
-	Port        string `json:"port"`
-	Onu         string `json:"onu"`
-	SN          string `json:"sn"`
-	OnuTypeName string `json:"onu_type_name"`
-	OnuTypeID   string `json:"onu_type_id"`
-	OltID       string `json:"olt_id"`
+	PonType     string     `json:"pon_type"`
+	Board       string     `json:"board"`
+	Port        string     `json:"port"`
+	Onu         string     `json:"onu"`
+	SN          string     `json:"sn"`
+	OnuTypeName string     `json:"onu_type_name"`
+	OnuTypeID   FlexString `json:"onu_type_id"`
+	OltID       string     `json:"olt_id"`
 }
 
 type ServicePort struct {
