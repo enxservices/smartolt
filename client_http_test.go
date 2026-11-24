@@ -85,3 +85,20 @@ func TestErrorWithoutMessageReportsTheStatusCode(t *testing.T) {
 		t.Fatalf("got error %v, want 502", err)
 	}
 }
+
+func TestGetOdbsReadsThePortCount(t *testing.T) {
+	cli := fakeSmartOLT(t, map[string]struct {
+		code int
+		body string
+	}{
+		"/system/get_odbs": {200, `{"status":true,"response":[{"id":"1","name":"BH001-01","latitude":null,"longitude":null,"zone_id":"1","zone_name":"1","nr_of_ports":"8","has_coords":"0"},{"id":"9","name":"BH002-03","latitude":null,"longitude":null,"zone_id":"2","zone_name":"2","nr_of_ports":"16","has_coords":"0"}]}`},
+	})
+
+	odbs, err := cli.GetOdbs()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(odbs) != 2 || odbs[0].Ports != 8 || odbs[1].Ports != 16 || odbs[0].ZoneID != "1" {
+		t.Fatalf("got %+v, want ports 8 and 16", odbs)
+	}
+}
