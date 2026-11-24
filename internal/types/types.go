@@ -35,7 +35,7 @@ type StatusSignal struct {
 }
 
 type OnuDetails struct {
-	ID                   int           `json:"unique_external_id"`
+	ID                   FlexString    `json:"unique_external_id"`
 	SN                   string        `json:"sn"`
 	Name                 string        `json:"name"`
 	OltID                string        `json:"olt_id"`
@@ -92,9 +92,20 @@ type SpeedProfile struct {
 	Type      string `json:"type"`
 }
 
+// ResponseError is the body of a failed call; status is a JSON boolean there, so it is not read.
 type ResponseError struct {
-	Status string `json:"status"`
-	Error  string `json:"error"`
+	Error string `json:"error"`
+}
+
+// OnuDetailsResponse is the body of get_onu_details, which nests the details under onu_details.
+type OnuDetailsResponse struct {
+	OnuDetails OnuDetails `json:"onu_details"`
+}
+
+// OnuSpeedProfiles is the body of get_onu_speed_profiles: the names of the ONU's profiles.
+type OnuSpeedProfiles struct {
+	Upload   string `json:"upload_speed_profile_name"`
+	Download string `json:"download_speed_profile_name"`
 }
 
 type Response[T any] struct {
