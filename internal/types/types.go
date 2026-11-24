@@ -134,7 +134,7 @@ type ODB struct {
 	Latitude  *string `json:"latitude"`
 	Longitude *string `json:"longitude"`
 	ZoneID    string  `json:"zone_id"`
-	Ports     int     `json:"ports,string"`
+	Ports     int     `json:"nr_of_ports,string"`
 }
 
 // ODBListResponse matches the ODBs list API response structure.
