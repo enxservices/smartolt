@@ -38,6 +38,7 @@ type MoveOnuDetails struct {
 
 type Client interface {
 	GetOnuDetails(ID string) (*types.OnuDetails, error)
+	GetOnuSpeedProfiles(ID string) (*types.OnuSpeedProfiles, error)
 	GetOnuSignal(ID string) (*types.StatusSignal, error)
 	GetSpeedProfiles() ([]types.SpeedProfile, error)
 	GetAllOnusDetails() ([]types.OnuListItem, error)
@@ -80,7 +81,7 @@ func (c *client) doRequest(req *http.Request, respBody interface{}) error {
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		var respErr types.ResponseError
 		data, _ := io.ReadAll(resp.Body)
-		if err := json.Unmarshal(data, &respErr); err != nil {
+		if err := json.Unmarshal(data, &respErr); err == nil && respErr.Error != "" {
 			return fmt.Errorf("%s", respErr.Error)
 		}
 
@@ -110,11 +111,25 @@ func (c *client) GetOnuDetails(ID string) (*types.OnuDetails, error) {
 		return nil, fmt.Errorf("%w", err)
 	}
 
-	var details types.OnuDetails
-	if err := c.doRequest(req, &details); err != nil {
+	var resp types.OnuDetailsResponse
+	if err := c.doRequest(req, &resp); err != nil {
 		return nil, err
 	}
-	return &details, nil
+	return &resp.OnuDetails, nil
+}
+
+func (c *client) GetOnuSpeedProfiles(ID string) (*types.OnuSpeedProfiles, error) {
+	url := fmt.Sprintf("%s%s/%s", c.baseURL, types.GETONUSPEEDPROFILES, ID)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("%w", err)
+	}
+
+	var profiles types.OnuSpeedProfiles
+	if err := c.doRequest(req, &profiles); err != nil {
+		return nil, err
+	}
+	return &profiles, nil
 }
 
 func (c *client) GetOnuSignal(ID string) (*types.StatusSignal, error) {
